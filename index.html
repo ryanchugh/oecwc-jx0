@@ -1,0 +1,554 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Study Timer</title>
+<style>
+:root{
+  --bg:#0a0a0b;--panel:#111214;--line:#222427;--text:#f3f4f6;
+  --muted:#8a8d93;--on:#b9c9df;--good:#55d6a0;--off:#777b83
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text)}
+body{font-family:Inter,system-ui,-apple-system,Segoe UI,Arial,sans-serif}
+button{font:inherit}
+.app{width:min(420px,100%);margin:0 auto;padding:22px 16px 28px}
+.top{display:flex;justify-content:space-between;align-items:center}
+.brand{font-size:13px;font-weight:800;letter-spacing:.02em}
+.status{display:flex;align-items:center;gap:7px;font-size:9px;font-weight:800;letter-spacing:.1em;color:var(--muted)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--off)}
+.dot.on{background:var(--good)}
+.card{margin-top:14px;border:1px solid var(--line);background:var(--panel);border-radius:18px}
+.timerCard{padding:32px 20px 22px;text-align:center}
+.label{color:var(--muted);font-size:9px;font-weight:800;letter-spacing:.13em}
+.timer{margin-top:10px;font-size:67px;line-height:1;font-weight:900;letter-spacing:-.07em;font-variant-numeric:tabular-nums}
+.state{margin-top:11px;font-size:13px;font-weight:800}
+.note{margin-top:5px;color:var(--muted);font-size:10px;line-height:1.45;min-height:29px}
+button.main{
+  width:100%;margin-top:17px;border:0;border-radius:12px;padding:12px 14px;
+  background:var(--text);color:#08090a;font-weight:850;cursor:pointer
+}
+button.stop{background:#18191c;color:var(--text);border:1px solid var(--line)}
+button:disabled{opacity:.45;cursor:not-allowed}
+.cameraCard{padding:10px}
+.camera{position:relative;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#050505;border:1px solid var(--line)}
+video{width:100%;height:100%;display:block;object-fit:cover;transform:scaleX(-1);opacity:.9}
+.cameraState{
+  position:absolute;left:8px;bottom:8px;padding:6px 8px;border-radius:7px;
+  background:rgba(0,0,0,.62);font-size:9px;font-weight:800;letter-spacing:.04em
+}
+.settings{padding:14px 15px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.small{font-size:10px;color:var(--muted)}
+.range{margin-top:10px;width:100%}
+.detail{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.detail strong{font-size:12px}
+.err{display:none;margin-top:10px;padding:9px;border-radius:9px;background:rgba(255,113,134,.08);border:1px solid rgba(255,113,134,.2);color:#ffc6cf;font-size:10px;line-height:1.45;text-align:left}
+@media(max-width:420px){.timer{font-size:57px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+.monthly{padding:14px}
+.monthlyHead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.monthlyStats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:10px}
+.monthStat{padding:9px;border:1px solid var(--line);border-radius:10px;background:var(--card2)}
+.monthBars{height:105px;display:flex;align-items:flex-end;gap:3px;margin-top:14px;padding:0 2px;border-bottom:1px solid var(--line)}
+.monthBarWrap{flex:1;min-width:0;height:100%;display:flex;align-items:flex-end;justify-content:center}
+.monthBar{width:100%;max-width:11px;min-height:2px;border-radius:3px 3px 0 0;background:#657792;opacity:.78}
+.monthBar.today{background:var(--accent2);opacity:1}
+.monthAxis{display:flex;justify-content:space-between;margin-top:5px;color:var(--muted);font-size:8px}
+@media(max-width:620px){
+  .monthlyStats{gap:5px}
+  .monthBars{height:82px;gap:2px}
+  .monthBar{max-width:8px}
+}
+</style>
+</head>
+<body>
+<main class="app" id="app">
+  <div class="top">
+    <div class="brand">STUDY TIMER</div>
+    <div class="status"><span id="dot" class="dot"></span><span id="status">OFF</span></div>
+  </div>
+
+  <section class="card timerCard">
+    <div class="label">REAL STUDY TIME</div>
+    <div id="timer" class="timer">00:00:00</div>
+    <div id="state" class="state">Ready</div>
+    <div id="note" class="note">Press Start. The camera will count only when you are detected.</div>
+    <button id="start" class="main">Start Camera Study</button>
+    <button id="manualStart" class="main stop">Start Manual Timer</button>
+    <button id="stop" class="main stop" style="display:none">Stop &amp; Save</button>
+    <button id="reset" class="main stop">Reset Today</button>
+    <div id="modeHint" style="margin-top:7px;font-size:9px;color:var(--muted)">
+      Camera = AI verified • Manual = library/offline
+    </div>
+    <div id="error" class="err"></div>
+  </section>
+
+  <section id="cameraCard" class="card cameraCard" style="display:none">
+    <div class="camera">
+      <video id="video" autoplay muted playsinline></video>
+      <div id="cameraState" class="cameraState">STARTING CAMERA…</div>
+    </div>
+  </section>
+
+  <section class="card settings">
+    <div class="row">
+      <div>
+        <div style="font-weight:800;font-size:11px">Away grace</div>
+        <div class="small">Seconds before the timer pauses.</div>
+      </div>
+      <strong id="graceText">5s</strong>
+    </div>
+    <input id="grace" class="range" type="range" min="2" max="12" value="5">
+    <div class="detail">
+      <div class="row">
+        <span class="small">Detection</span>
+        <strong id="aiStatus">Not loaded</strong>
+      </div>
+      <div class="small" style="margin-top:7px">Full-range face model • optimized for farther faces</div>
+    </div>
+  </section>
+
+  <section class="card monthly">
+    <div class="monthlyHead">
+      <div>
+        <div class="title">This Month</div>
+        <div class="small">Daily study time • camera + manual</div>
+      </div>
+      <div id="monthTitle" class="small"></div>
+    </div>
+    <div class="monthlyStats">
+      <div class="monthStat"><div class="label">TOTAL</div><div id="monthTotal" class="qnum">00:00:00</div></div>
+      <div class="monthStat"><div class="label">AVG / DAY</div><div id="monthAvg" class="qnum">00:00:00</div></div>
+      <div class="monthStat"><div class="label">BEST DAY</div><div id="monthBest" class="qnum">00:00:00</div></div>
+    </div>
+    <div id="monthBars" class="monthBars"></div>
+    <div class="monthAxis"><span>1</span><span>10</span><span>20</span><span>31</span></div>
+  </section>
+</main>
+
+<script type="module">
+const $=s=>document.querySelector(s);
+const video=$("#video");
+const cameraCard=$("#cameraCard");
+const startBtn=$("#start");
+const stopBtn=$("#stop");
+const errorBox=$("#error");
+
+let stream=null;
+let detector=null;
+let aiReady=false;
+let running=false;
+let facePresent=false;
+let missingSince=0;
+let lastTick=performance.now();
+let lastDetect=0;
+let timerSeconds=0;
+let raf=0;
+
+const KEY="study_timer_min_v1";
+const HISTORY_KEY="study_timer_history_v1";
+const today=new Date().toISOString().slice(0,10);
+let history={};
+let lastSaveAt=0;
+
+function loadData(){
+  try{
+    const x=JSON.parse(localStorage.getItem(KEY));
+    if(x&&x.date===today){
+      return {
+        ai:Number(x.aiSeconds ?? x.seconds)||0,
+        manual:Number(x.manualSeconds)||0
+      };
+    }
+  }catch{}
+  return {ai:0,manual:0};
+}
+try{
+  const h=JSON.parse(localStorage.getItem(HISTORY_KEY));
+  if(h&&typeof h==="object")history=h;
+}catch{}
+
+const savedData=loadData();
+let aiSeconds=savedData.ai;
+let manualSeconds=savedData.manual;
+let mode="camera";
+let manualRunning=false;
+let manualStartTime=0;
+
+function manualElapsed(){
+  if(!manualRunning||!manualStartTime)return 0;
+  return Math.max(0,(performance.now()-manualStartTime)/1000);
+}
+function totalTime(){
+  return aiSeconds+manualSeconds+manualElapsed();
+}
+function persistHistory(){
+  history[today]={
+    ai:Math.max(0,aiSeconds),
+    manual:Math.max(0,manualSeconds),
+    total:Math.max(0,aiSeconds+manualSeconds)
+  };
+  const keys=Object.keys(history).sort();
+  while(keys.length>62)delete history[keys.shift()];
+  try{localStorage.setItem(HISTORY_KEY,JSON.stringify(history))}catch{}
+}
+function save(force=false){
+  const now=Date.now();
+  if(!force && now-lastSaveAt<5000)return;
+  lastSaveAt=now;
+  try{
+    localStorage.setItem(KEY,JSON.stringify({
+      date:today,
+      aiSeconds:Math.max(0,aiSeconds),
+      manualSeconds:Math.max(0,manualSeconds)
+    }));
+    persistHistory();
+  }catch{}
+}
+function showError(t){
+  errorBox.textContent=t;
+  errorBox.style.display="block";
+}
+function clearError(){errorBox.textContent="";errorBox.style.display="none"}
+function fmt(s){
+  s=Math.max(0,Math.floor(s));
+  return [
+    String(Math.floor(s/3600)).padStart(2,"0"),
+    String(Math.floor((s%3600)/60)).padStart(2,"0"),
+    String(s%60).padStart(2,"0")
+  ].join(":");
+}
+function renderMonth(){
+  const now=new Date();
+  const year=now.getFullYear();
+  const month=now.getMonth();
+  const days=new Date(year,month+1,0).getDate();
+
+  $("#monthTitle").textContent=now.toLocaleString([], {month:"long",year:"numeric"});
+
+  const vals=[];
+  let total=0;
+  for(let d=1;d<=days;d++){
+    const k=`${year}-${String(month+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+    const v=Number(history[k]?.total)||0;
+    vals.push(v);
+    total+=v;
+  }
+
+  const logged=vals.filter(v=>v>0).length;
+  const avg=logged?total/logged:0;
+  const best=Math.max(0,...vals);
+  $("#monthTotal").textContent=fmt(total);
+  $("#monthAvg").textContent=fmt(avg);
+  $("#monthBest").textContent=fmt(best);
+
+  const max=Math.max(60,best);
+  $("#monthBars").innerHTML=vals.map((v,i)=>{
+    const d=i+1;
+    const k=`${year}-${String(month+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+    const todayClass=k===today?" today":"";
+    const height=v?Math.max(4,Math.round(v/max*100)):2;
+    return `<div class="monthBarWrap" title="${d}: ${fmt(v)}"><div class="monthBar${todayClass}" style="height:${height}%"></div></div>`;
+  }).join("");
+}
+
+function render(){
+  $("#timer").textContent=fmt(totalTime());
+  $("#dot").className="dot"+(running?" on":"");
+  $("#status").textContent=running?(mode==="manual"?"MANUAL":"LIVE"):"OFF";
+
+  if(!running){
+    $("#state").textContent="Ready";
+    $("#note").textContent="Camera verifies your presence. Manual mode is for library/offline study.";
+  }else if(mode==="manual"){
+    $("#state").textContent="Manual Study";
+    $("#note").textContent="Manual timer is running. Stop & Save when you finish.";
+  }else if(facePresent){
+    $("#state").textContent="Studying";
+    $("#note").textContent="You are detected. Time is counting.";
+  }else{
+    $("#state").textContent="Away";
+    $("#note").textContent="No face detected. Timer is paused.";
+  }
+
+  $("#cameraState").textContent=
+    mode==="manual"&&running?"Manual timer • camera not required":
+    !stream?"Camera off":
+    !aiReady?"Camera on • AI loading":
+    facePresent?"Face detected • counting":"No face • paused";
+
+  $("#modeHint").textContent=
+    mode==="manual"&&running
+      ?"MANUAL MODE • library/offline • stop to save"
+      :"Camera = AI verified • Manual = library/offline";
+  renderMonth();
+}
+
+function resetForNewDay(){
+  const saved=loadData();
+  aiSeconds=saved.ai;
+  manualSeconds=saved.manual;
+  persistHistory();
+  render();
+}
+
+async function loadAI(){
+  if(aiReady)return true;
+  $("#aiStatus").textContent="Loading…";
+  try{
+    const {FilesetResolver,FaceDetector}=await import(
+      "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/+esm"
+    );
+    const fileset=await FilesetResolver.forVisionTasks(
+      "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/wasm"
+    );
+
+    detector=await FaceDetector.createFromOptions(fileset,{
+      baseOptions:{
+        modelAssetPath:
+          "https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_full_range/float16/1/blaze_face_full_range.tflite",
+        delegate:"CPU"
+      },
+      runningMode:"VIDEO",
+      minDetectionConfidence:.42,
+      minSuppressionThreshold:.25
+    });
+
+    aiReady=true;
+    $("#aiStatus").textContent="Ready";
+    return true;
+  }catch(e){
+    console.error(e);
+    $("#aiStatus").textContent="Failed";
+    showError("Camera may still work, but AI could not load. Check your internet connection and use Chrome/Edge from localhost or HTTPS.");
+    return false;
+  }
+}
+
+async function startStudy(){
+  clearError();
+  startBtn.disabled=true;
+  startBtn.textContent="Starting…";
+
+  try{
+    if(!navigator.mediaDevices?.getUserMedia){
+      throw new Error("Camera access is not available in this browser.");
+    }
+
+    stream=await navigator.mediaDevices.getUserMedia({
+      video:{
+        width:{ideal:960,max:1280},
+        height:{ideal:540,max:720},
+        frameRate:{ideal:10,max:15},
+        facingMode:"user"
+      },
+      audio:false
+    });
+
+    video.srcObject=stream;
+    await video.play();
+
+    cameraCard.style.display="block";
+    running=true;
+    mode="camera";
+    manualRunning=false;
+    startBtn.style.display="none";
+    $("#manualStart").style.display="none";
+    stopBtn.style.display="block";
+    stopBtn.textContent="Stop & Save";
+    startBtn.disabled=false;
+    lastTick=performance.now();
+
+    render();
+
+    // AI is loaded after the camera is already visible.
+    await loadAI();
+
+    // Start the lightweight timer/detection loop.
+    lastDetect=0;
+    raf=requestAnimationFrame(loop);
+  }catch(e){
+    console.error(e);
+    if(stream)stream.getTracks().forEach(t=>t.stop());
+    stream=null;
+    running=false;
+    startBtn.disabled=false;
+    startBtn.textContent="Start Study";
+
+    const reason=
+      e.name==="NotAllowedError"
+        ?"Camera permission was denied. Allow camera access in the browser address bar and try again."
+      :e.name==="NotFoundError"
+        ?"No webcam was found. Check Windows camera permissions and your webcam."
+      :e.name==="NotReadableError"
+        ?"Your webcam is busy in another application."
+      :e.message||String(e);
+
+    showError(reason);
+    render();
+  }
+}
+
+function stopStudy(){
+  if(mode==="manual"){
+    const elapsed=manualElapsed();
+    if(elapsed>0)manualSeconds+=elapsed;
+    manualRunning=false;
+    manualStartTime=0;
+    running=false;
+    cancelAnimationFrame(raf);
+    save(true);
+
+    startBtn.style.display="block";
+    $("#manualStart").style.display="block";
+    stopBtn.style.display="none";
+    render();
+    return;
+  }
+
+  running=false;
+  cancelAnimationFrame(raf);
+  if(stream)stream.getTracks().forEach(t=>t.stop());
+  stream=null;
+  facePresent=false;
+  missingSince=0;
+  cameraCard.style.display="none";
+  startBtn.style.display="block";
+  $("#manualStart").style.display="block";
+  stopBtn.style.display="none";
+  startBtn.textContent="Start Camera Study";
+  startBtn.disabled=false;
+  save(true);
+  render();
+}
+
+function startManual(){
+  if(running)return;
+  clearError();
+  mode="manual";
+  manualRunning=true;
+  manualStartTime=performance.now();
+  running=true;
+  facePresent=false;
+  cameraCard.style.display="none";
+
+  startBtn.style.display="none";
+  $("#manualStart").style.display="none";
+  stopBtn.style.display="block";
+  stopBtn.textContent="Stop & Save";
+
+  lastTick=performance.now();
+  render();
+  raf=requestAnimationFrame(loop);
+}
+
+function resetToday(){
+  if(!confirm("Reset all study time for today?"))return;
+
+  if(stream)stream.getTracks().forEach(t=>t.stop());
+  stream=null;
+
+  running=false;
+  manualRunning=false;
+  manualStartTime=0;
+  mode="camera";
+  facePresent=false;
+  missingSince=0;
+
+  aiSeconds=0;
+  manualSeconds=0;
+
+  try{localStorage.removeItem(KEY)}catch{}
+  delete history[today];
+  try{localStorage.setItem(HISTORY_KEY,JSON.stringify(history))}catch{}
+
+  cameraCard.style.display="none";
+  startBtn.style.display="block";
+  $("#manualStart").style.display="block";
+  stopBtn.style.display="none";
+  startBtn.textContent="Start Camera Study";
+  startBtn.disabled=false;
+
+  save();
+  render();
+}
+
+async function detectFace(now){
+  if(!aiReady||!stream||video.readyState<2||!video.videoWidth)return;
+
+  try{
+    const result=detector.detectForVideo(video,Math.round(now));
+    const detected=Array.isArray(result?.detections)&&result.detections.length>0;
+
+    if(detected){
+      if(!facePresent){
+        facePresent=true;
+        missingSince=0;
+      }
+    }else if(facePresent){
+      if(!missingSince)missingSince=now;
+      const grace=Number($("#grace").value)*1000;
+      if(now-missingSince>=grace){
+        facePresent=false;
+        missingSince=0;
+      }
+    }
+  }catch(e){
+    console.error("face detection:",e);
+  }
+}
+
+function loop(now){
+  if(!running)return;
+
+  if(mode==="manual"){
+    render();
+    raf=requestAnimationFrame(loop);
+    return;
+  }
+
+  const delta=Math.max(0,Math.min(1,(now-lastTick)/1000));
+  lastTick=now;
+
+  const detectEvery=facePresent?1000:500;
+  if(aiReady&&now-lastDetect>=detectEvery){
+    lastDetect=now;
+    detectFace(now);
+  }
+
+  if(aiReady&&facePresent){
+    aiSeconds+=delta;
+    save();
+  }
+
+  render();
+  raf=requestAnimationFrame(loop);
+}
+
+$("#grace").addEventListener("input",()=>{
+  $("#graceText").textContent=$("#grace").value+"s";
+});
+startBtn.addEventListener("click",startStudy);
+$("#manualStart").addEventListener("click",startManual);
+stopBtn.addEventListener("click",stopStudy);
+$("#reset").addEventListener("click",resetToday);
+
+window.addEventListener("beforeunload",()=>{
+  if(mode==="manual"&&manualRunning){
+    manualSeconds+=manualElapsed();
+    manualRunning=false;
+    manualStartTime=0;
+  }
+  if(stream)stream.getTracks().forEach(t=>t.stop());
+  save(true);
+});
+
+resetForNewDay();
+persistHistory();
+renderMonth();
+render();
+</script>
+</body>
+</html>
