@@ -3,215 +3,494 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0a0a0b">
-<title>Study Timer</title>
+<meta name="theme-color" content="#090a0b">
+<title>Study Timer — Long Range</title>
 <style>
-:root{--bg:#0a0a0b;--panel:#111214;--line:#222427;--text:#f3f4f6;--muted:#8a8d93;--good:#55d6a0;--warn:#e7c56a;--bad:#ff7186;--accent:#b9c9df}
-*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif}button,select,input{font:inherit}
-.app{width:min(520px,100%);margin:auto;padding:18px 14px 34px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px}.brand{font-size:13px;font-weight:900;letter-spacing:.03em}.status{font-size:9px;color:var(--muted);font-weight:900;letter-spacing:.1em}.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#777b83;margin-right:6px}.dot.on{background:var(--good)}
-.card{margin-top:12px;padding:14px;border:1px solid var(--line);background:var(--panel);border-radius:16px}.timer{text-align:center;padding:27px 14px 18px}.label{font-size:9px;color:var(--muted);font-weight:900;letter-spacing:.13em}.big{margin-top:8px;font-size:64px;line-height:1;font-weight:900;letter-spacing:-.07em;font-variant-numeric:tabular-nums}.state{margin-top:9px;font-size:14px;font-weight:900}.note{margin:5px auto 0;color:var(--muted);font-size:10px;line-height:1.45;min-height:28px;max-width:395px}
-button{width:100%;padding:12px;margin-top:12px;border:0;border-radius:10px;background:var(--text);color:#090909;font-weight:900;cursor:pointer}button.alt{background:#18191c;color:var(--text);border:1px solid var(--line)}button:disabled{opacity:.45;cursor:not-allowed}.err{display:none;margin-top:8px;padding:9px;border:1px solid #ff718633;background:#ff718610;border-radius:8px;color:#ffc6cf;font-size:10px;line-height:1.45;text-align:left}
-.r{display:flex;justify-content:space-between;align-items:center;gap:10px}.sm{font-size:9px;color:var(--muted)}.clock{font-size:27px;font-weight:900;font-variant-numeric:tabular-nums}.date{font-size:10px;color:var(--muted)}.tag,.pill{font-size:8px;color:var(--muted);border:1px solid var(--line);border-radius:7px;padding:5px 7px;font-weight:900}.pill.good{color:var(--good);border-color:#55d6a044}.pill.warn{color:var(--warn);border-color:#e7c56a44}.pill.bad{color:var(--bad);border-color:#ff718644}
-.fields{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.f{border:1px solid var(--line);border-radius:9px;padding:8px}.f label{display:block;font-size:8px;color:var(--muted);font-weight:900}.f select{width:100%;margin-top:5px;border:0;background:transparent;color:var(--text);font-size:11px;outline:0}.cam{position:relative;aspect-ratio:16/9;background:#050505;border-radius:11px;overflow:hidden;border:1px solid var(--line)}.cam video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}.guide{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:62%;height:66%;border:1px dashed #ffffff35;border-radius:22px;pointer-events:none}.cs{position:absolute;left:7px;bottom:7px;background:#000b;padding:6px 8px;border-radius:7px;font-size:9px;font-weight:800}
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.metric{border:1px solid var(--line);border-radius:10px;padding:10px}.metric div{font-size:8px;color:var(--muted);margin-bottom:4px;font-weight:900;letter-spacing:.06em}.metric b{font-size:15px;font-variant-numeric:tabular-nums}.barbg{height:7px;border-radius:5px;background:#1b1d20;overflow:hidden;margin-top:10px}.barfill{height:100%;width:0;background:var(--accent)}.divider{border-top:1px solid var(--line);margin-top:12px;padding-top:12px}.range{width:100%}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:9px}.st{border:1px solid var(--line);border-radius:8px;padding:8px}.n{font-size:11px;font-weight:900;margin-top:3px;font-variant-numeric:tabular-nums}.bars{height:90px;display:flex;align-items:flex-end;gap:2px;border-bottom:1px solid var(--line);margin-top:10px}.w{flex:1;height:100%;display:flex;align-items:flex-end;justify-content:center}.bar{width:100%;max-width:10px;background:#657792;min-height:2px}.today{background:var(--accent)}.axis{display:flex;justify-content:space-between;color:var(--muted);font-size:8px;margin-top:4px}.foot{margin-top:10px;color:var(--muted);font-size:8px;line-height:1.45;text-align:center}@media(max-width:420px){.big{font-size:54px}}
+:root{--bg:#090a0b;--panel:#111315;--line:#24272b;--text:#f4f5f6;--muted:#8d9299;--good:#55d6a0;--warn:#e7c56a;--bad:#ff7186}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+body{min-height:100vh}.app{width:min(470px,100%);margin:auto;padding:18px 14px 30px}
+.top,.row{display:flex;justify-content:space-between;align-items:center;gap:10px}.brand{font-size:13px;font-weight:950;letter-spacing:.04em}
+.status{font-size:9px;color:var(--muted);font-weight:900;letter-spacing:.1em}.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#777b83;margin-right:6px}.dot.on{background:var(--good)}
+.card{margin-top:12px;border:1px solid var(--line);background:var(--panel);border-radius:16px;padding:14px}
+.hero{text-align:center;padding:27px 15px 18px}.label{font-size:9px;color:var(--muted);font-weight:950;letter-spacing:.14em}
+.big{margin-top:8px;font-size:63px;line-height:1;font-weight:950;letter-spacing:-.07em;font-variant-numeric:tabular-nums}
+.state{margin-top:9px;font-size:14px;font-weight:950}.note{max-width:390px;min-height:29px;margin:5px auto 0;color:var(--muted);font-size:10px;line-height:1.45}
+button{width:100%;margin-top:12px;padding:12px;border:0;border-radius:10px;background:var(--text);color:#090a0b;font-weight:950;cursor:pointer}
+button.alt{background:#191b1e;color:var(--text);border:1px solid var(--line)}button:disabled{opacity:.45}.err{display:none;margin-top:9px;padding:9px;border:1px solid #ff718633;background:#ff718610;border-radius:9px;color:#ffc6cf;font-size:10px;line-height:1.45;text-align:left;white-space:pre-wrap}
+.clock{font-size:28px;font-weight:950;font-variant-numeric:tabular-nums}.date{font-size:10px;color:var(--muted);margin-top:2px}.tag,.pill{font-size:8px;font-weight:950;border:1px solid var(--line);border-radius:7px;padding:5px 7px;color:var(--muted)}
+.pill.good{color:var(--good);border-color:#55d6a044}.pill.warn{color:var(--warn);border-color:#e7c56a44}.pill.bad{color:var(--bad);border-color:#ff718644}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.field{border:1px solid var(--line);border-radius:9px;padding:8px}.field label{display:block;font-size:8px;color:var(--muted);font-weight:950}
+select{width:100%;margin-top:4px;border:0;background:transparent;color:var(--text);font-size:11px;outline:0}
+.camWrap{padding:10px}.cam{position:relative;aspect-ratio:16/9;border:1px solid var(--line);border-radius:11px;overflow:hidden;background:#050505}
+video{width:100%;height:100%;display:block;object-fit:cover;transform:scaleX(-1)}.guide{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:58%;height:72%;border:1px dashed #ffffff32;border-radius:22px;pointer-events:none}
+.badge{position:absolute;top:8px;background:#000c;padding:6px 8px;border-radius:8px;font-size:8px;font-weight:900}.left{left:8px}.right{right:8px}
+.bottom{position:absolute;left:8px;right:8px;bottom:8px;display:flex;justify-content:space-between;gap:8px}.camState{background:#000c;padding:6px 8px;border-radius:8px;font-size:8px;font-weight:900}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:10px}.metric{border:1px solid var(--line);border-radius:9px;padding:9px}.mLabel{font-size:7px;color:var(--muted);font-weight:950;letter-spacing:.06em}.mVal{font-size:14px;font-weight:950;margin-top:3px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.track{height:7px;margin-top:10px;background:#1b1d20;border-radius:5px;overflow:hidden}.fill{height:100%;width:0;background:#c7d4e8}.info{display:flex;justify-content:space-between;gap:8px;color:var(--muted);font-size:8px;margin-top:6px}
+.divider{border-top:1px solid var(--line);margin-top:12px;padding-top:12px}.small{font-size:9px;line-height:1.42;color:var(--muted)}.bold{font-size:11px;font-weight:950}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:9px}.st{border:1px solid var(--line);border-radius:9px;padding:8px}.num{font-size:11px;font-weight:950;margin-top:3px;font-variant-numeric:tabular-nums}
+.bars{height:88px;display:flex;align-items:flex-end;gap:2px;border-bottom:1px solid var(--line);margin-top:10px}.w{flex:1;height:100%;display:flex;align-items:flex-end;justify-content:center}.bar{width:100%;max-width:10px;background:#657792;min-height:2px}.today{background:#c7d4e8}
+.axis{display:flex;justify-content:space-between;color:var(--muted);font-size:8px;margin-top:4px}.foot{text-align:center;color:var(--muted);font-size:8px;line-height:1.45;margin-top:10px}
+@media(max-width:420px){.big{font-size:53px}}
 </style>
 </head>
 <body>
 <main class="app">
 <div class="top"><div class="brand">STUDY TIMER</div><div class="status"><span id="dot" class="dot"></span><span id="status">OFF</span></div></div>
 
-<section class="card timer">
-<div class="label">REAL STUDY TIME</div><div id="timer" class="big">00:00:00</div><div id="state" class="state">Ready</div><div id="note" class="note">Camera verifies presence without changing your iPhone/iPad clock.</div>
-<button id="camStart">Start Camera Study</button><button id="manStart" class="alt">Start Manual Study</button><button id="stop" class="alt" style="display:none">Stop &amp; Save</button><button id="reset" class="alt">Reset Simulated Day</button><div id="err" class="err"></div>
+<section class="card hero">
+<div class="label">REAL STUDY TIME</div><div id="timer" class="big">00:00:00</div><div id="state" class="state">Ready</div>
+<div id="note" class="note">Long-range person tracking is primary. Face detection is only supporting evidence.</div>
+<button id="camStart">Start Camera Study</button><button id="manualStart" class="alt">Start Manual Study</button>
+<button id="stop" class="alt" style="display:none">Stop &amp; Save</button><button id="reset" class="alt">Reset Simulated Day</button>
+<div id="error" class="err"></div>
 </section>
 
 <section class="card">
-<div class="r"><div><div class="label">SIMULATED CLOCK</div><div id="vtime" class="clock"></div><div id="vdate" class="date"></div></div><div id="tag" class="tag"></div></div>
-<div class="fields"><div class="f"><label>TIME SHIFT</label><select id="ts"><option value="0">0h</option><option value="-60">−1h</option><option value="-120">−2h</option><option value="-180">−3h</option><option value="-240">−4h</option><option value="-270" selected>−4h 30m</option><option value="-300">−5h</option><option value="60">+1h</option></select></div><div class="f"><label>DATE SHIFT</label><select id="ds"><option value="-1">Yesterday</option><option value="0">Today</option><option value="1" selected>Tomorrow</option><option value="2">+2 days</option><option value="7">+7 days</option></select></div></div>
-<div class="sm" style="margin-top:8px">The device date/time stays unchanged. Only this tracker uses the simulated clock.</div>
-</section>
-
-<section id="cameraCard" class="card" style="display:none"><div class="cam"><video id="video" autoplay muted playsinline></video><div class="guide"></div><div id="camState" class="cs">STARTING…</div></div></section>
-
-<section class="card">
-<div class="r"><div><div class="label">CAMERA INTELLIGENCE</div><div class="sm">Face first. Pose fallback for side/3⁄4 views. Hands are supporting telemetry, never required to count.</div></div><span id="presencePill" class="pill">WAITING</span></div>
-<div class="grid" style="margin-top:10px">
-<div class="metric"><div>FACE</div><b id="faceM">—</b></div>
-<div class="metric"><div>POSE</div><b id="poseM">—</b></div>
-<div class="metric"><div>HANDS</div><b id="handM">0</b></div>
-<div class="metric"><div>PRESENCE</div><b id="confM">0%</b></div>
+<div class="row"><div><div class="label">SIMULATED CLOCK</div><div id="simTime" class="clock">--:--:--</div><div id="simDate" class="date">—</div></div><div id="shiftTag" class="tag">+1D • −4H 30M</div></div>
+<div class="fields">
+<div class="field"><label>TIME SHIFT</label><select id="timeShift"><option value="0">0h</option><option value="-60">−1h</option><option value="-120">−2h</option><option value="-180">−3h</option><option value="-240">−4h</option><option value="-270" selected>−4h 30m</option><option value="-300">−5h</option><option value="60">+1h</option></select></div>
+<div class="field"><label>DATE SHIFT</label><select id="dateShift"><option value="-1">Yesterday</option><option value="0">Today</option><option value="1" selected>Tomorrow</option><option value="2">+2 days</option><option value="7">+7 days</option></select></div>
 </div>
-<div class="barbg"><div id="confBar" class="barfill"></div></div>
-<div class="r" style="margin-top:6px"><span id="strategy" class="sm">Starting…</span><span id="quality" class="sm">Camera idle</span></div>
-<div class="divider"><div class="r"><div><b style="font-size:11px">Away grace</b><div class="sm">Protects against brief profile/occlusion misses.</div></div><b id="gt">5s</b></div><input id="gr" class="range" type="range" min="2" max="15" value="5"></div>
+<div class="small" style="margin-top:8px">Device time/date stay unchanged. Only this tracker uses the simulation.</div>
+</section>
+
+<section id="cameraCard" class="card camWrap" style="display:none">
+<div class="cam"><video id="video" autoplay muted playsinline></video><div class="guide"></div>
+<span id="rangeBadge" class="badge left">LONG RANGE</span><span id="resBadge" class="badge right">—</span>
+<div class="bottom"><span id="camState" class="camState">STARTING…</span><span class="camState">PERSON TRACK</span></div>
+</div>
 </section>
 
 <section class="card">
-<div class="r"><div><div class="label">MONTH</div><b style="font-size:12px">Study history</b></div><div id="mt" class="sm"></div></div>
-<div class="stats"><div class="st"><div class="label">TOTAL</div><div id="mto" class="n">00:00:00</div></div><div class="st"><div class="label">AVG / DAY</div><div id="mav" class="n">00:00:00</div></div><div class="st"><div class="label">BEST DAY</div><div id="mbs" class="n">00:00:00</div></div></div>
+<div class="row"><div><div class="label">TRACKING</div><div class="small">Minimal UI. Person detector decides presence.</div></div><span id="presence" class="pill">WAITING</span></div>
+<div class="metrics">
+<div class="metric"><div class="mLabel">PERSON</div><div id="person" class="mVal">—</div></div>
+<div class="metric"><div class="mLabel">FACE</div><div id="face" class="mVal">—</div></div>
+<div class="metric"><div class="mLabel">SIGNAL</div><div id="signal" class="mVal">0%</div></div>
+</div>
+<div class="track"><div id="fill" class="fill"></div></div><div class="info"><span id="strategy">Waiting</span><span id="quality">Idle</span></div>
+<div class="divider"><div class="row"><div><div class="bold">Away grace</div><div class="small">Time before an actual absence pauses the tracker.</div></div><b id="graceText">7s</b></div>
+<input id="grace" type="range" min="3" max="15" value="7" style="width:100%;margin-top:7px"></div>
+</section>
+
+<section class="card">
+<div class="row"><div><div class="label">THIS MONTH</div><div class="small">Study history on simulated dates</div></div><div id="monthTitle" class="small"></div></div>
+<div class="stats"><div class="st"><div class="label">TOTAL</div><div id="monthTotal" class="num">00:00:00</div></div><div class="st"><div class="label">AVG / DAY</div><div id="monthAvg" class="num">00:00:00</div></div><div class="st"><div class="label">BEST DAY</div><div id="monthBest" class="num">00:00:00</div></div></div>
 <div id="bars" class="bars"></div><div class="axis"><span>1</span><span>10</span><span>20</span><span>31</span></div>
 </section>
-<div class="foot">All camera processing is local to the browser. The tracker does not record or upload your camera video.</div>
+
+<div class="foot">Camera processing stays in your browser. No video is recorded or uploaded.</div>
 </main>
 
 <script type="module">
 const $=s=>document.querySelector(s);
-const KEY='st_v4',SK='st_s4';
-let data={daily:{}};try{const x=JSON.parse(localStorage.getItem(KEY)||'{}');if(x&&typeof x==='object')data=x;if(!data.daily)data.daily={}}catch{}
-let tsh=-270,dsh=1,gr=5;try{const s=JSON.parse(localStorage.getItem(SK)||'{}');if(Number.isFinite(s.t))tsh=s.t;if(Number.isFinite(s.d))dsh=s.d;if(Number.isFinite(s.g))gr=s.g}catch{}
-$('#ts').value=tsh;$('#ds').value=dsh;$('#gr').value=gr;$('#gt').textContent=gr+'s';
-const p=n=>String(n).padStart(2,'0'),dk=d=>d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate());
-function simDate(ms=Date.now()){const d=new Date(ms+tsh*60000);d.setDate(d.getDate()+dsh);return d}
-function simKey(ms=Date.now()){return dk(simDate(ms))}
-function fmt(s){s=Math.max(0,Math.floor(s));return p(Math.floor(s/3600))+':'+p(Math.floor(s%3600/60))+':'+p(s%60)}
+const STORE="study_quality_v2";
+const SETTINGS="st_s4";
+
+/* Preserve the existing simulated clock settings. */
+let timeShift=-270,dateShift=1,grace=7;
+try{
+  const s=JSON.parse(localStorage.getItem(SETTINGS)||"{}");
+  if(Number.isFinite(s.t))timeShift=s.t;
+  if(Number.isFinite(s.d))dateShift=s.d;
+  if(Number.isFinite(s.g))grace=s.g;
+}catch{}
+$("#timeShift").value=timeShift;
+$("#dateShift").value=dateShift;
+$("#grace").value=grace;
+$("#graceText").textContent=grace+"s";
+
+let data={daily:{}};
+try{
+  const old=JSON.parse(localStorage.getItem(STORE)||"{}");
+  if(old&&typeof old==="object")data=old;
+  if(!data.daily)data.daily={};
+}catch{}
+
+const pad=n=>String(n).padStart(2,"0");
+const keyOf=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+
+function simDate(ms=Date.now()){
+  const d=new Date(ms+timeShift*60000);
+  d.setDate(d.getDate()+dateShift);
+  return d;
+}
+function simKey(ms=Date.now()){return keyOf(simDate(ms))}
+function fmt(s){
+  s=Math.max(0,Math.floor(s));
+  return pad(Math.floor(s/3600))+":"+pad(Math.floor((s%3600)/60))+":"+pad(s%60);
+}
 function day(k){return data.daily[k]||(data.daily[k]={camera:0,manual:0})}
-function saveData(){try{localStorage.setItem(KEY,JSON.stringify(data))}catch{}}
-function saveSettings(){try{localStorage.setItem(SK,JSON.stringify({t:tsh,d:dsh,g:gr}))}catch{}}
-function totalFor(k){const x=data.daily[k]||{};return(Number(x.camera)||0)+(Number(x.manual)||0)}
+function totalFor(k){const d=data.daily[k]||{};return(Number(d.camera)||0)+(Number(d.manual)||0)}
+function save(){try{localStorage.setItem(STORE,JSON.stringify(data))}catch{}}
+function saveSettings(){try{localStorage.setItem(SETTINGS,JSON.stringify({t:timeShift,d:dateShift,g:grace}))}catch{}}
 
-let stream=null,faceDet=null,poseDet=null,handDet=null,vision=null,fs=null;
-let run=false,mode='',counting=false,aiReady=false,faceScore=0,poseScore=0,hands=0,confidence=0,missingSince=0;
-let lastWall=Date.now(),lastFaceSend=0,lastPoseSend=0,lastHandSend=0,lastFaceResult=0,lastPoseResult=0,lastHandResult=0;
-let lastSaved=0,frameRAF=0;
-
+/* Correctly write study time to the simulated calendar date, including midnight rollover. */
 function addInterval(kind,a,b){
   if(b<=a)return;
   let cur=a;
   while(cur<b){
-    const sd=simDate(cur);
-    const midnight=new Date(sd);midnight.setHours(24,0,0,0);
-    const end=Math.min(b,midnight.getTime()-tsh*60000);
+    const d=simDate(cur);
+    const midnight=new Date(d);midnight.setHours(24,0,0,0);
+    const end=Math.min(b,midnight.getTime()-timeShift*60000);
     const sec=(end-cur)/1000;
-    if(sec>0)day(dk(sd))[kind]=(day(dk(sd))[kind]||0)+sec;
+    if(sec>0)day(keyOf(d))[kind]=(day(keyOf(d))[kind]||0)+sec;
     cur=end;
   }
 }
-function saveIfNeeded(force=false){
-  if(force||Date.now()-lastSaved>=3000){saveData();lastSaved=Date.now()}
-}
-function showError(t){$('#err').textContent=t;$('#err').style.display='block'}
-function clearError(){$('#err').textContent='';$('#err').style.display='none'}
 
 function renderMonth(){
   const d=simDate(),y=d.getFullYear(),m=d.getMonth(),days=new Date(y,m+1,0).getDate();
   let total=0,best=0,logged=0,vals=[];
-  for(let i=1;i<=days;i++){const k=y+'-'+p(m+1)+'-'+p(i),v=totalFor(k);vals.push(v);total+=v;if(v){logged++;best=Math.max(best,v)}}
-  $('#mt').textContent=d.toLocaleString([],{month:'long',year:'numeric'});
-  $('#mto').textContent=fmt(total);$('#mav').textContent=fmt(logged?total/logged:0);$('#mbs').textContent=fmt(best);
+  for(let i=1;i<=days;i++){
+    const k=y+"-"+pad(m+1)+"-"+pad(i),v=totalFor(k);
+    vals.push(v);total+=v;
+    if(v>0){logged++;best=Math.max(best,v)}
+  }
+  $("#monthTitle").textContent=d.toLocaleString([],{month:"long",year:"numeric"});
+  $("#monthTotal").textContent=fmt(total);
+  $("#monthAvg").textContent=fmt(logged?total/logged:0);
+  $("#monthBest").textContent=fmt(best);
   const mx=Math.max(60,best),today=simKey();
-  $('#bars').innerHTML=vals.map((v,i)=>'<div class=w><div class="bar '+(today==(y+'-'+p(m+1)+'-'+p(i+1))?'today':'')+'" style="height:'+(v?Math.max(4,Math.round(v/mx*100)):2)+'%"></div></div>').join('');
+  $("#bars").innerHTML=vals.map((v,i)=>{
+    const k=y+"-"+pad(m+1)+"-"+pad(i+1),h=v?Math.max(4,Math.round(v/mx*100)):2;
+    return '<div class=w><div class="bar '+(k===today?"today":"")+'" style="height:'+h+'%"></div></div>';
+  }).join("");
 }
 
+let objectDetector=null,faceDetector=null,vision=null,fs=null;
+let stream=null,running=false,mode="";
+let personScore=0,faceScore=0;
+let seenRecent=0,lastStrong=0;
+let lastObject=0,lastFace=0,lastWall=Date.now(),raf=0,lastSave=0;
+
+function showError(t){$("#error").textContent=t;$("#error").style.display="block"}
+function clearError(){$("#error").textContent="";$("#error").style.display="none"}
+
+async function loadAI(){
+  if(objectDetector)return true;
+  $("#strategy").textContent="Loading AI…";
+
+  try{
+    /*
+      Use Google's documented browser bundle path and a known stable package
+      rather than the previous "+esm" endpoint.
+    */
+    vision=await import("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs");
+    fs=await vision.FilesetResolver.forVisionTasks(
+      "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm"
+    );
+
+    objectDetector=await vision.ObjectDetector.createFromOptions(fs,{
+      baseOptions:{
+        modelAssetPath:"https://storage.googleapis.com/mediapipe-tasks/object_detector/efficientdet_lite0_uint8.tflite",
+        delegate:"CPU"
+      },
+      runningMode:"VIDEO",
+      maxResults:1,
+      scoreThreshold:.30,
+      categoryAllowlist:["person"]
+    });
+
+    try{
+      faceDetector=await vision.FaceDetector.createFromOptions(fs,{
+        baseOptions:{
+          modelAssetPath:"https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_full_range/float16/1/blaze_face_full_range.tflite",
+          delegate:"CPU"
+        },
+        runningMode:"VIDEO",
+        minDetectionConfidence:.18,
+        minSuppressionThreshold:.15
+      });
+    }catch(e){
+      console.warn("Face detector unavailable; person tracking still works.",e);
+    }
+
+    $("#strategy").textContent="Person AI ready";
+    return true;
+  }catch(e){
+    console.error(e);
+    $("#strategy").textContent="AI failed";
+    showError(
+      "AI failed to load.\n\n"+(e?.message||String(e))+
+      "\n\nFor a downloaded HTML file, test it from HTTPS or localhost. The live GitHub Pages version is the correct environment for camera + model loading."
+    );
+    return false;
+  }
+}
+
+function detectPerson(now){
+  if(!objectDetector||!$("#video").videoWidth||$("#video").readyState<2)return;
+
+  try{
+    const result=objectDetector.detectForVideo($("#video"),Math.round(now));
+    let best=0;
+    for(const d of(result?.detections||[])){
+      const c=d.categories?.[0];
+      const name=(c?.categoryName||"").toLowerCase();
+      if(name==="person")best=Math.max(best,Number(c.score)||0);
+    }
+
+    personScore=best;
+
+    if(best>=.30){
+      seenRecent=Date.now();
+      lastStrong=Date.now();
+    }
+  }catch(e){
+    console.warn("person detect",e);
+  }
+}
+
+function detectFace(now){
+  if(!faceDetector||!$("#video").videoWidth||$("#video").readyState<2)return;
+
+  try{
+    const result=faceDetector.detectForVideo($("#video"),Math.round(now));
+    let best=0;
+    for(const d of(result?.detections||[]))
+      best=Math.max(best,Number(d.categories?.[0]?.score)||0);
+    faceScore=best;
+  }catch(e){
+    console.warn("face detect",e);
+  }
+}
+
+/*
+  Conservative state machine:
+  - Person is the only signal allowed to start counting.
+  - Face can protect an already-running timer from a very short person-detector miss.
+  - Face alone can never start the timer.
+  - Long absence always ends counting after grace.
+*/
+function updateState(){
+  const now=Date.now();
+  const recentPerson=(now-seenRecent)<=1400;
+  const recentStrong=(now-lastStrong)<=2200;
+  const faceSupport=faceScore>=.18 && recentStrong;
+
+  if(!running||mode!=="camera")return;
+
+  if(recentPerson||recentStrong){
+    if(!counting){
+      counting=true;
+      missingSince=0;
+    }
+    return;
+  }
+
+  if(faceSupport){
+    if(!missingSince)missingSince=now;
+    if(now-missingSince<Math.max(2,grace)*1000)return;
+  }
+
+  if(!missingSince)missingSince=now;
+
+  if(now-missingSince>=grace*1000){
+    counting=false;
+    missingSince=0;
+  }
+}
+
+let counting=false,missingSince=0;
+
 function render(){
-  const now=Date.now(),d=simDate(now),k=simKey(now),t=totalFor(k);
-  $('#timer').textContent=fmt(t);
-  $('#vtime').textContent=p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds());
-  $('#vdate').textContent=d.toLocaleDateString([],{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  $('#tag').textContent=(dsh>=0?'+':'')+dsh+'D • '+(tsh>=0?'+':'')+tsh+'M';
-  $('#dot').className='dot'+(run?' on':'');$('#status').textContent=run?(mode==='manual'?'MANUAL':'LIVE'):'OFF';
-  $('#state').textContent=!run?'Ready':mode==='manual'?'Manual Study':counting?'Studying':confidence>0.18?'Checking':'Away';
-  $('#note').textContent=!run?'Camera verifies presence without changing your device clock.':mode==='manual'?'Manual timer is running. Stop & Save when finished.':counting?'Presence verified. Time is counting.':'No reliable presence. Side-view grace is active.';
-  $('#camState').textContent=!stream?'Camera off':!aiReady?'Loading face AI':counting?'Present • counting':confidence>0.18?'Checking signals':'Away • paused';
-  $('#faceM').textContent=faceScore>=.22?'Detected':'Not seen';$('#poseM').textContent=poseScore>=.28?'Detected':'Not seen';$('#handM').textContent=hands;
-  $('#confM').textContent=Math.round(confidence*100)+'%';$('#confBar').style.width=Math.round(confidence*100)+'%';
-  $('#presencePill').textContent=!run?'WAITING':counting?'COUNTING':confidence>0.18?'CHECKING':'AWAY';
-  $('#presencePill').className='pill '+(counting?'good':confidence>0.18?'warn':run?'bad':'');
-  $('#strategy').textContent=faceScore>=.22?'Face primary':poseScore>=.28?'Pose fallback • side tolerant':'Searching face + pose';
-  const tr=stream?.getVideoTracks?.()[0],set=tr?.getSettings?.();
-  $('#quality').textContent=set?((set.width||'?')+'×'+(set.height||'?')+' • '+Math.round(set.frameRate||0)+' fps'):'Camera idle';
+  const now=Date.now(),d=simDate(now),k=simKey(now);
+  $("#timer").textContent=fmt(totalFor(k));
+  $("#simTime").textContent=pad(d.getHours())+":"+pad(d.getMinutes())+":"+pad(d.getSeconds());
+  $("#simDate").textContent=d.toLocaleDateString([],{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+  $("#shiftTag").textContent=(dateShift>=0?"+":"")+dateShift+"D • −"+Math.abs(timeShift/60)+"H 30M".replace("30M",timeShift===-270?"30M":"");
+
+  $("#dot").className="dot"+(running?" on":"");
+  $("#status").textContent=running?(mode==="manual"?"MANUAL":"LIVE"):"OFF";
+
+  $("#state").textContent=!running?"Ready":mode==="manual"?"Manual Study":counting?"Studying":personScore>0||faceScore>0?"Checking":"Away";
+
+  $("#note").textContent=!running
+    ?"Person detection is primary. Face is supporting only."
+    :mode==="manual"
+    ?"Manual timer is running. Stop & Save when finished."
+    :counting
+    ?"Person detected. Time is counting."
+    :"No current person signal. Timer is paused.";
+
+  $("#camState").textContent=!stream?"Camera off":counting?"Person detected • counting":"No person • paused";
+  const sig=Math.max(personScore,faceScore*.55);
+  $("#person").textContent=personScore?Math.round(personScore*100)+"%":"No";
+  $("#face").textContent=faceScore?Math.round(faceScore*100)+"%":"No";
+  $("#signal").textContent=Math.round(Math.min(1,sig)*100)+"%";
+  $("#fill").style.width=Math.round(Math.min(1,sig)*100)+"%";
+  $("#presence").textContent=!running?"WAITING":counting?"COUNTING":personScore||faceScore?"CHECKING":"AWAY";
+  $("#presence").className="pill "+(counting?"good":personScore||faceScore?"warn":running?"bad":"");
+  $("#strategy").textContent=objectDetector?"Person detector primary • face secondary":"Waiting for AI";
+
+  const tr=stream?.getVideoTracks?.()[0],s=tr?.getSettings?.();
+  $("#quality").textContent=s?((s.width||"?")+"×"+(s.height||"?")):"Idle";
+  $("#resBadge").textContent=s?((s.width||"?")+"×"+(s.height||"?")):"—";
   renderMonth();
 }
 
-function poseScoreFrom(r){
-  const lm=r?.landmarks?.[0];if(!lm)return 0;
-  const q=i=>{const a=lm[i];return a?Math.max(Number(a.visibility)||0,Number(a.presence)||0):0};
-  const head=Math.max(q(0),q(7),q(8),q(9),q(10));
-  const oneShoulder=Math.max(q(11),q(12)),twoShoulders=(q(11)+q(12))/2;
-  const elbow=Math.max(q(13),q(14)),hip=Math.max(q(23),q(24));
-  return Math.min(1,Math.max(head*.88,oneShoulder*.95,twoShoulders*.8,elbow*.72,hip*.65));
-}
-function handCount(r){return Array.isArray(r?.landmarks)?Math.min(2,r.landmarks.length):0}
-
-async function loadFace(){
-  const mod=await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/+esm');
-  vision=mod;fs=await mod.FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/wasm');
-  faceDet=await mod.FaceDetector.createFromOptions(fs,{baseOptions:{modelAssetPath:'https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_full_range/float16/1/blaze_face_full_range.tflite',delegate:'CPU'},runningMode:'LIVE_STREAM',minDetectionConfidence:.22,minSuppressionThreshold:.18,resultListener:r=>{let b=0;for(const d of(r?.detections||[]))b=Math.max(b,Number(d.categories?.[0]?.score)||0);faceScore=b;lastFaceResult=Date.now()}});
-  aiReady=true;$('#ai').textContent='Async AI active';
-}
-async function loadOptional(){
-  if(!vision||!fs)return;
-  try{
-    poseDet=await vision.PoseLandmarker.createFromOptions(fs,{baseOptions:{modelAssetPath:'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task',delegate:'CPU'},runningMode:'LIVE_STREAM',numPoses:1,minPoseDetectionConfidence:.28,minPosePresenceConfidence:.25,minTrackingConfidence:.25,resultListener:r=>{poseScore=poseScoreFrom(r);lastPoseResult=Date.now()}});
-  }catch(e){console.warn('Pose unavailable',e)}
-  try{
-    handDet=await vision.HandLandmarker.createFromOptions(fs,{baseOptions:{modelAssetPath:'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task',delegate:'CPU'},runningMode:'LIVE_STREAM',numHands:2,minHandDetectionConfidence:.25,minHandPresenceConfidence:.25,minTrackingConfidence:.25,resultListener:r=>{hands=handCount(r);lastHandResult=Date.now()}});
-  }catch(e){console.warn('Hands unavailable',e)}
-}
-async function loadAI(){
-  if(vision)return;
-  $('#strategy').textContent='Loading face model…';
-  try{await loadFace();loadOptional().catch(()=>{})}
-  catch(e){console.error(e);$('#ai').textContent='AI failed';showError('AI could not load. Use HTTPS and allow internet for the first model download.')}
-}
-function updatePresence(){
-  const now=Date.now();
-  if(now-lastFaceResult>2600)faceScore=0;
-  if(now-lastPoseResult>3600)poseScore=0;
-  const raw=Math.max(faceScore,poseScore*.96);
-  confidence=confidence*.78+raw*.22;
-  const strong=raw>=.28||faceScore>=.20||poseScore>=.34;
-  const weak=raw>=.16||faceScore>=.14||poseScore>=.22;
-  if(strong){counting=true;missingSince=0}
-  else if(counting&&weak){if(!missingSince)missingSince=now;if(now-missingSince>=gr*1000){counting=false;missingSince=0}}
-  else if(!weak){counting=false;missingSince=0}
-}
-function sendAI(){
-  if(!vision||!stream||$('#video').readyState<2||!$('#video').videoWidth||document.visibilityState!=='visible')return;
-  const ts=performance.now();
-  try{
-    if(faceDet&&ts-lastFaceSend>=450){lastFaceSend=ts;faceDet.detectAsync($('#video'),ts)}
-    const now=Date.now();
-    if(poseDet&&ts-lastPoseSend>=(counting?1100:700)){lastPoseSend=ts;poseDet.detectAsync($('#video'),ts)}
-    if(handDet&&counting&&ts-lastHandSend>=2200){lastHandSend=ts;handDet.detectAsync($('#video'),ts)}
-  }catch(e){console.warn('AI frame',e)}
-}
-function loop(){
-  if(!run)return;
-  const now=Date.now(),delta=Math.max(0,Math.min(1500,now-lastWall));lastWall=now;
-  updatePresence();sendAI();
-  if(delta>0&&((mode==='camera'&&counting)||mode==='manual'))addInterval(mode==='manual'?'manual':'camera',now-delta,now);
-  saveIfNeeded(false);render();
-  frameRAF=requestAnimationFrame(loop);
-}
-function stopStream(){if(stream)stream.getTracks().forEach(t=>t.stop());stream=null;$('#video').srcObject=null;faceScore=poseScore=hands=confidence=0;counting=false;missingSince=0;$('#cameraCard').style.display='none'}
 async function startCamera(){
-  if(run)return;clearError();$('#camStart').disabled=true;
+  if(running)return;
+  clearError();
+  $("#camStart").disabled=true;
+
   try{
-    if(!navigator.mediaDevices?.getUserMedia)throw new Error('Camera access is not available in this browser.');
-    stream=await navigator.mediaDevices.getUserMedia({video:{width:{ideal:960,max:1280},height:{ideal:540,max:720},frameRate:{ideal:10,max:15},facingMode:'user'},audio:false});
-    $('#video').srcObject=stream;await $('#video').play();$('#cameraCard').style.display='block';run=true;mode='camera';lastWall=Date.now();
-    $('#camStart').style.display='none';$('#manStart').style.display='none';$('#stop').style.display='block';render();await loadAI();frameRAF=requestAnimationFrame(loop);
-  }catch(e){stopStream();run=false;showError(e.name==='NotAllowedError'?'Camera permission was blocked. Allow Camera for this website.':e.message||'Could not start camera.');render()}
-  finally{$('#camStart').disabled=false}
+    if(!navigator.mediaDevices?.getUserMedia)
+      throw new Error("Camera API is unavailable in this page context. Use HTTPS or localhost.");
+
+    stream=await navigator.mediaDevices.getUserMedia({
+      video:{
+        width:{ideal:1280,max:1920},
+        height:{ideal:720,max:1080},
+        frameRate:{ideal:10,max:15},
+        facingMode:"user"
+      },
+      audio:false
+    });
+
+    $("#video").srcObject=stream;
+    await $("#video").play();
+    $("#cameraCard").style.display="block";
+
+    running=true;mode="camera";counting=false;missingSince=0;
+    personScore=0;faceScore=0;seenRecent=0;lastStrong=0;
+    lastWall=Date.now();lastObject=0;lastFace=0;
+
+    $("#camStart").style.display="none";
+    $("#manualStart").style.display="none";
+    $("#stop").style.display="block";
+
+    render();
+    const ok=await loadAI();
+
+    if(ok)raf=requestAnimationFrame(loop);
+    else{
+      running=false;stopStream();
+      $("#camStart").style.display="block";
+      $("#manualStart").style.display="block";
+      $("#stop").style.display="none";
+      render();
+    }
+  }catch(e){
+    stopStream();running=false;
+    showError(
+      e.name==="NotAllowedError"
+      ?"Camera permission was blocked. Allow Camera for this website."
+      :e.name==="NotFoundError"
+      ?"No camera was found."
+      :e.name==="NotReadableError"
+      ?"The camera is busy in another application."
+      :(e.message||String(e))
+    );
+    render();
+  }finally{
+    $("#camStart").disabled=false;
+  }
 }
-function startManual(){if(run)return;clearError();mode='manual';run=true;lastWall=Date.now();$('#camStart').style.display='none';$('#manStart').style.display='none';$('#stop').style.display='block';render();frameRAF=requestAnimationFrame(loop)}
-function stop(){
-  if(!run)return;
-  const now=Date.now(),delta=Math.max(0,now-lastWall);
-  if(delta>0&&((mode==='camera'&&counting)||mode==='manual'))addInterval(mode==='manual'?'manual':'camera',now-delta,now);
-  run=false;cancelAnimationFrame(frameRAF);saveData();lastSaved=Date.now();if(mode==='camera')stopStream();else mode='';
-  $('#camStart').style.display='block';$('#manStart').style.display='block';$('#stop').style.display='none';$('#ts').disabled=false;$('#ds').disabled=false;render();
+
+function startManual(){
+  if(running)return;
+  clearError();running=true;mode="manual";lastWall=Date.now();
+  $("#camStart").style.display="none";
+  $("#manualStart").style.display="none";
+  $("#stop").style.display="block";
+  render();raf=requestAnimationFrame(loop);
 }
-function reset(){
-  if(!confirm('Reset all study time for the current simulated day?'))return;
-  data.daily[simKey()]={camera:0,manual:0};saveData();render();
+
+function stopStream(){
+  if(stream)stream.getTracks().forEach(t=>t.stop());
+  stream=null;$("#video").srcObject=null;counting=false;
+  personScore=faceScore=0;seenRecent=0;lastStrong=0;missingSince=0;
+  $("#cameraCard").style.display="none";
 }
-$('#ts').onchange=e=>{tsh=+e.target.value;saveSettings();render()};$('#ds').onchange=e=>{dsh=+e.target.value;saveSettings();render()};
-$('#gr').oninput=e=>{gr=+e.target.value;$('#gt').textContent=gr+'s';saveSettings()};
-$('#camStart').onclick=startCamera;$('#manStart').onclick=startManual;$('#stop').onclick=stop;$('#reset').onclick=reset;
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState!=='visible'&&run&&mode==='camera')missingSince=Date.now();render()});
-window.addEventListener('pagehide',()=>{if(run){const now=Date.now(),delta=Math.max(0,now-lastWall);if(delta>0&&((mode==='camera'&&counting)||mode==='manual'))addInterval(mode==='manual'?'manual':'camera',now-delta,now);saveData()}if(stream)stopStream()});
+
+function stopStudy(){
+  if(!running)return;
+
+  const now=Date.now();
+  const delta=Math.max(0,now-lastWall);
+
+  if(delta>0){
+    if(mode==="camera"&&counting)addInterval("camera",now-delta,now);
+    if(mode==="manual")addInterval("manual",now-delta,now);
+  }
+
+  running=false;cancelAnimationFrame(raf);
+  if(mode==="camera")stopStream();
+  mode="";save();
+
+  $("#camStart").style.display="block";
+  $("#manualStart").style.display="block";
+  $("#stop").style.display="none";
+  render();
+}
+
+function resetToday(){
+  if(!confirm("Reset all study time for the current simulated day?"))return;
+  data.daily[simKey()]={camera:0,manual:0};
+  save();render();
+}
+
+function loop(){
+  if(!running)return;
+
+  const now=Date.now();
+  const delta=Math.max(0,Math.min(1600,now-lastWall));
+  lastWall=now;
+
+  if(mode==="manual"){
+    if(delta>0)addInterval("manual",now-delta,now);
+  }else if(document.visibilityState==="visible"){
+
+    const t=performance.now();
+
+    /* Person detector is the high-quality primary. */
+    if(objectDetector && t-lastObject>=350){
+      lastObject=t;
+      detectPerson(t);
+    }
+
+    /* Face is sampled more slowly and never starts the timer. */
+    if(faceDetector && t-lastFace>=900){
+      lastFace=t;
+      detectFace(t);
+    }
+
+    updateState();
+
+    if(counting&&delta>0)addInterval("camera",now-delta,now);
+  }else{
+    counting=false;
+  }
+
+  if(now-lastSave>=2500){save();lastSave=now}
+  render();
+  raf=requestAnimationFrame(loop);
+}
+
+$("#timeShift").addEventListener("change",e=>{timeShift=Number(e.target.value);saveSettings();render()});
+$("#dateShift").addEventListener("change",e=>{dateShift=Number(e.target.value);saveSettings();render()});
+$("#grace").addEventListener("input",e=>{grace=Number(e.target.value);$("#graceText").textContent=grace+"s";saveSettings()});
+$("#camStart").addEventListener("click",startCamera);
+$("#manualStart").addEventListener("click",startManual);
+$("#stop").addEventListener("click",stopStudy);
+$("#reset").addEventListener("click",resetToday);
+
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState!=="visible"&&mode==="camera"){counting=false;missingSince=Date.now()}render()});
+window.addEventListener("pagehide",()=>{
+  if(running){
+    const now=Date.now(),delta=Math.max(0,now-lastWall);
+    if(delta>0){
+      if(mode==="camera"&&counting)addInterval("camera",now-delta,now);
+      if(mode==="manual")addInterval("manual",now-delta,now);
+    }
+  }
+  save();
+  if(stream)stopStream();
+});
+
 render();
 </script>
 </body>
